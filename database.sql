@@ -44,3 +44,11 @@ CREATE TABLE Student (
     ClassID INT,
     FOREIGN KEY (ClassID) REFERENCES Class(ClassID)
 );
+
+-- Attendance table
+CREATE TABLE Attendance (
+    AttendanceID INT AUTO_INCREMENT PRIMARY KEY,
+    StudentID INT,
+    Timestamp DATETIME,
+    FOREIGN KEY (StudentID) REFERENCES Student(StudentID)
+);
