@@ -1,3 +1,5 @@
+mysql-connector-python
+pandas
+matplotlib
 opencv-python
 opencv-contrib-python
-mysql-connector-python
