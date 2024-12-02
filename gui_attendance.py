@@ -13,7 +13,7 @@ import subprocess
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="Rootpass2025",    # Enter your own password here 
+    password="soccerawesome7",    # Enter your own password here 
     database="AttendanceSystem"
 )
 cursor = db.cursor()
@@ -78,8 +78,8 @@ def add_student():
         db.commit()
 
         messagebox.showinfo("Success", f"Student {first_name} {last_name} added!")
-        subprocess.run(['python', 'face_taker.py', first_name])  # Run scripts
-        subprocess.run(['python', 'face_train.py']) 
+        subprocess.run(['python3', 'face_taker.py', first_name])  # Run scripts
+        subprocess.run(['python3', 'face_train.py']) 
         add_student_window.destroy()
 
     add_student_window = tk.Toplevel()
@@ -104,40 +104,56 @@ def add_student():
 
 
 
+from tkinter import ttk
 
 # Function to generate and display attendance reports
 def generate_attendance_report():
+    # Query to fetch all students and their attendance status
     query = """
     SELECT 
+        s.StudentID, 
+        CONCAT(s.FirstName, ' ', s.LastName) AS Name, 
         a.AttendanceID, 
-        s.FirstName, 
-        s.LastName, 
-        a.Timestamp 
-    FROM 
-        Attendance a 
-    JOIN 
-        Student s 
-    ON 
-        a.StudentID = s.StudentID
+        a.Timestamp, 
+        CASE 
+            WHEN a.AttendanceID IS NOT NULL THEN 'Present' 
+            ELSE 'Absent' 
+        END AS Status
+    FROM Student s
+    LEFT JOIN Attendance a ON s.StudentID = a.StudentID
     """
     cursor.execute(query)
     rows = cursor.fetchall()
-    columns = ["AttendanceID", "FirstName", "LastName", "Timestamp"]
-    df = pd.DataFrame(rows, columns=columns)
 
-    # Convert Timestamp to datetime and group by date
-    df["Timestamp"] = pd.to_datetime(df["Timestamp"])
-    df["Date"] = df["Timestamp"].dt.date
-    trend = df.groupby("Date").size()
+    # Create a new window for the attendance report
+    report_window = tk.Toplevel()
+    report_window.title("Attendance Logs")
 
-    # Plot the attendance trend
-    plt.figure(figsize=(10, 6))
-    trend.plot(kind="line", marker="o")
-    plt.title("Attendance Trends Over Time")
-    plt.xlabel("Date")
-    plt.ylabel("Number of Attendances")
-    plt.grid()
-    plt.show()
+    # Add a Treeview widget
+    tree = ttk.Treeview(
+        report_window, 
+        columns=("StudentID", "Name", "AttendanceID", "Timestamp", "Status"), 
+        show="headings"
+    )
+    tree.heading("StudentID", text="StudentID")
+    tree.heading("Name", text="Name")
+    tree.heading("AttendanceID", text="AttendanceID")
+    tree.heading("Timestamp", text="Timestamp")
+    tree.heading("Status", text="Status")
+
+    # Insert the data into the Treeview
+    for row in rows:
+        tree.insert("", tk.END, values=row)
+
+    tree.pack(fill=tk.BOTH, expand=True)
+
+    # Add a scroll bar
+    scrollbar = ttk.Scrollbar(report_window, orient="vertical", command=tree.yview)
+    tree.configure(yscrollcommand=scrollbar.set)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    # Inform the user
+    messagebox.showinfo("Attendance Report", "Logs displayed in a new window.")
 
 # Main GUI window
 root = tk.Tk()
