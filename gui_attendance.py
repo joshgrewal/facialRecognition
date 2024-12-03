@@ -13,7 +13,7 @@ import subprocess
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="soccerawesome7",    # Enter your own password here 
+    password="Rootpass2025",    # Enter your own password here 
     database="AttendanceSystem"
 )
 cursor = db.cursor()
